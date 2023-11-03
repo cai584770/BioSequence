@@ -1,5 +1,7 @@
 package com.cai.compress.SCCG.methods;
 
+import com.cai.compress.SCCG.entity.Position;
+
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
@@ -58,7 +60,6 @@ public class ORGD {
 	}
 
 	public static void use7zip(String filename, String Dfilename) throws IOException {
-
 		File zipFile = new File(filename);
 		if (!zipFile.exists()) {
 			return;
@@ -72,25 +73,16 @@ public class ORGD {
 		}
 	}
 
-	public static class Position {
-		int startinRef;
-		int endinRef;
-	}
-
 	public static StringBuilder reconstruct(String inFileName, String reference) throws IOException {
 		FileInputStream fileinputstream = new FileInputStream(inFileName);
 		DataInputStream datainputstream = new DataInputStream(fileinputstream);
 		BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(datainputstream));
-
 		String line;
 		StringBuilder stringbuilder = new StringBuilder();
-
 		int prev_end = 0, index = 0;
 
 		while ((line = bufferedreader.readLine()) != null) {
-
 			if (index == 4) {
-
 				if (line.contains(",")) {
 					String[] strings = line.split(",");
 					int begin = Integer.parseInt(strings[0]);
@@ -108,7 +100,6 @@ public class ORGD {
 					stringbuilder.append(line);
 				}
 				continue;
-
 			} else if (index < 4) {
 				index++;
 				continue;
@@ -140,7 +131,6 @@ public class ORGD {
 	}
 
 	public static void main(String[] args) throws IOException {
-
 		if (args.length != 3) {
 			System.out.println("Make sure you have inputted 3 arguments.");
 			System.exit(0);
@@ -277,7 +267,6 @@ public class ORGD {
 			bufferedreader.close();
 
 			String reference = "";
-
 			if (N_list.size() > 0) {
 				reference = readrefSeq(reference_file);
 			} else if (N_list.size() <= 0) {
@@ -293,9 +282,7 @@ public class ORGD {
 			int index = 0, iterator = 0;
 			boolean accept = false;
 			for (Position position : N_list) {
-
 				while (true) {
-
 					if (iterator >= position.startinRef && iterator < position.endinRef) {
 						interim.append('N');
 					} else if (iterator < position.startinRef && !accept) {
@@ -322,9 +309,7 @@ public class ORGD {
 
 			if (interim.length() > 0) {
 				target_string = new StringBuilder(interim);
-				// System.out.println("FINAL SIZE: " + target_string.length());
 			} else {
-				// System.out.println("FINAL SIZE: " + target_string.length());
 			}
 
 			for (Position position : L_list) {
@@ -337,7 +322,6 @@ public class ORGD {
 			}
 
 			String final_string = target_string.toString();
-
 			target_string = new StringBuilder();
 			target_string.append(final_string.charAt(0));
 
@@ -349,9 +333,7 @@ public class ORGD {
 			}
 
 			final_string = meta_data + (target_string.append("\n")).toString();
-
 			write(output, final_string);
-
 			System.out.println("Decompressed file is " + args[2] + "/" + chrName[i]);
 		}
 
@@ -374,12 +356,10 @@ public class ORGD {
 		}
 
 		File compress_file = new File(compress_file_path);
-
-		// final output path
 		String file_name = compress_file.getName();
-
 		String[] file_name_parts = file_name.split("_ref_");
 		String extractedPart = "";
+
 		if (file_name_parts.length > 0) {
 			extractedPart = file_name_parts[0];
 		} else {
@@ -406,6 +386,7 @@ public class ORGD {
 		} else {
 			System.out.println("Dot (.) not found in the file name.");
 		}
+
 		// String temp_za_extra = file_name_part;
 		String za_extra = unzip_folder + "/" + file_name_part;
 		Runtime.getRuntime().exec("rm -rf " + za_extra);

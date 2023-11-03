@@ -1,5 +1,7 @@
 package com.cai.sequence
 
+import java.util
+
 /**
  * @author cai584770
  * @date 2023/10/29 21:47
@@ -29,7 +31,10 @@ abstract class BioSequence(filePath:String) {
 
   def format: Unit
 
-  def compress: Unit
+  def compress(reference_seq :String): util.List[String]
+
+  def uncompress(compress_result :util.List[String]): String
+
 
   def comparison:Unit
 

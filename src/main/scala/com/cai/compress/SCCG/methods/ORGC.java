@@ -1,5 +1,8 @@
 package com.cai.compress.SCCG.methods;
 
+import com.cai.compress.SCCG.entity.NewKmer;
+import com.cai.compress.SCCG.entity.Position;
+
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
@@ -24,11 +27,11 @@ public class ORGC {
 	public static int[] next_kmer = new int[maxchar];
 	public static int[] kmer_location = new int[maxseq];// global hash table
 	public static boolean local = true;
-	public static HashMap<Integer, List<newkmer>> hashmap;
+	public static HashMap<Integer, List<NewKmer>> hashmap;
 
 	public ORGC() throws IOException {
 		text = "";
-		hashmap = new HashMap<Integer, List<newkmer>>();
+		hashmap = new HashMap<Integer, List<NewKmer>>();
 	}
 
 	public static long getCPUTime() {
@@ -207,17 +210,17 @@ public class ORGC {
 
 		while (i < length - kmer_length + 1) {
 			String kmer = read.substring(i, i + kmer_length);
-			newkmer newKMer = new newkmer();
+			NewKmer newKMer = new NewKmer();
 			newKMer.setkmerstart(i);
 			newKMer.setkmer(kmer);
 			int key = kmer.hashCode();
 			if (hashmap.containsKey(key)) {
 				{
-					List<newkmer> list = hashmap.get(key);
+					List<NewKmer> list = hashmap.get(key);
 					list.add(newKMer);
 				}
 			} else {
-				List<newkmer> list = new ArrayList<newkmer>();
+				List<NewKmer> list = new ArrayList<NewKmer>();
 				list.add(newKMer);
 				hashmap.put(key, list);
 			}
@@ -334,10 +337,10 @@ public class ORGC {
 				continue;
 			}
 
-			List<newkmer> klist = hashmap.get(key);
+			List<NewKmer> klist = hashmap.get(key);
 			startIndex = Integer.MAX_VALUE;
 			most_incre = 0;
-			for (newkmer newKMer : klist) {
+			for (NewKmer newKMer : klist) {
 				if (newKMer.getkmer().equals(kmer)) {
 					kmerstart = newKMer.getkmerstart();
 					endinRef = kmerstart + kmer_length - 1;
@@ -554,7 +557,6 @@ public class ORGC {
 	}
 
 	public static void format_matches(List<Position> list, String fileName) throws IOException {
-
 		StringBuilder stringbuilder = new StringBuilder();
 
 		int startinTar, startinRef, endinRef, endinTar = 0;
@@ -743,68 +745,6 @@ public class ORGC {
 		bufferedreader.close();
 
 		write(final_file, stringbuilder.toString(), true);
-
-	}
-
-	public static class Position {
-
-		private int startinRef;
-		private int endinRef;
-		private int startinTar;
-		private int endinTar;
-
-		public int getstartinRef() {
-			return startinRef;
-		}
-
-		public void setstartinRef(int startinRef) {
-			this.startinRef = startinRef;
-		}
-
-		public int getendinRef() {
-			return endinRef;
-		}
-
-		public void setendinRef(int endinRef) {
-			this.endinRef = endinRef;
-		}
-
-		public int getstartinTar() {
-			return startinTar;
-		}
-
-		public void setstartinTar(int startinTar) {
-			this.startinTar = startinTar;
-		}
-
-		public int getendinTar() {
-			return endinTar;
-		}
-
-		public void setendinTar(int endinTar) {
-			this.endinTar = endinTar;
-		}
-	}
-
-	public static class newkmer {
-		private String kmer;
-		private int kmerstart;
-
-		public String getkmer() {
-			return kmer;
-		}
-
-		public void setkmer(String kmer) {
-			this.kmer = kmer;
-		}
-
-		public int getkmerstart() {
-			return kmerstart;
-		}
-
-		public void setkmerstart(int kmerstart) {
-			this.kmerstart = kmerstart;
-		}
 
 	}
 
@@ -1465,18 +1405,14 @@ public class ORGC {
 				}
 
 				// pre-processing
-
 				int kmer_length = ORGC.kmer_length;
-
 				reference = (reference_seq.substring(0, reference_seq.length()));
 				target = (target_seq.substring(0, target_seq.length()));
 
 				// global Matching Phase
-
 				List<Position> list = Gmatch(reference, target, kmer_length);
 
 				// post-processing
-
 				format_matches(list, tempfile);
 				postprocess(tempfile, final_file);
 

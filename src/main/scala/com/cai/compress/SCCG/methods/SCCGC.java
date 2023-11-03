@@ -1224,21 +1224,15 @@ public class SCCGC {
 			}
 
 			if (!local) {
-				// long localtime = getCPUTime() - startCpuTimeNano;
-				// System.out.println( "Local attempt time: " + (double) localtime /
-				// 1000000000.0 + " seconds.");
 				break;
 			}
 
 			// post-processing
-
 			sccgc.postprocess(tempfile, final_file);
-
 			sccgc.use7zip(final_file);
 
 			file = new File(tempfile);
 			file.delete();
-
 			file = new File(final_file);
 			file.delete();
 
@@ -1255,7 +1249,6 @@ public class SCCGC {
 			}
 
 			// load data
-
 			String greference = reference_genome;
 			String gtarget = target_genome;
 			String tempfile = final_folder + "//interim.txt";
@@ -1269,18 +1262,15 @@ public class SCCGC {
 			}
 
 			// pre-processing
-
 			int kmer_length = SCCGC.kmer_length;
 
 			reference = (reference_seq.substring(0, reference_seq.length()));
 			target = (target_seq.substring(0, target_seq.length()));
 
 			// global Matching Phase
-
 			List<Position> list = sccgc.Gmatch(reference, target, kmer_length);
 
 			// post-processing
-
 			sccgc.format_matches(list, tempfile);
 			sccgc.postprocess(tempfile, final_file);
 
@@ -1298,279 +1288,295 @@ public class SCCGC {
 		System.out.println("Done\n" + "-----------------------------------------------------");
 	}
 
-	// public String compress(String reference_sequence, String target_sequence)
-	// throws IOException, InterruptedException {
-	// kmer_length = 21; //
-	// int controuble = 0; //
-	// boolean is_con = false; //
-	// String compress_sequence = ""; // 压缩结果 ->final_floder
-	// String temp_sequence1 = ""; // 临时字符串
-	// String temp_sequence2 = ""; // 临时字符串
+	// main
+	public static void compress(String ref_file_path, String tar_file_path, String result_file_path) throws IOException, InterruptedException {
+		String[] args = {ref_file_path,tar_file_path,result_file_path};
 
-	// SCCGC sccgc = new SCCGC();
+		kmer_length = 21;
+		int controuble = 0;
+		boolean is_con = false;
+		SCCGC sccgc = new SCCGC();
 
-	// // 当序列长度为0时报错退出
-	// if (reference_sequence.length() == 0 || target_sequence.length() == 0) {
-	// System.out.println("Input error!");
-	// System.exit(0);
-	// }
+		if (args.length != 3) {
+			System.out.println("Make sure you have inputted 3 arguments.");
+			System.exit(0);
+		}
 
-	// // max内存和计时器
-	// Runtime currRuntime = Runtime.getRuntime();
-	// int nMAX = (int) (currRuntime.maxMemory() / 1024 / 1024);
-	// System.out.println("MAX RAM :" + nMAX + "M");
-	// Date startDate = new Date();
-	// long startCpuTimeNano = sccgc.getCPUTime();
-	// System.out.println("Start time: " + startDate);
+		String reference_genome = args[0]; // reference file .fa path
+		String target_genome = args[1]; // target file .fa path
+		String final_folder = args[2];// output file folder
+		String[] chrs = target_genome.split("/");
+		String final_file = final_folder + "/" + chrs[(chrs.length - 1)];
+		System.out.println("final_file:" + final_file);
 
-	// while (local) {
-	// mismatch = 0;
-	// // load data 直接传入字符串
-	// String reference_seq = reference_sequence;
-	// String target_seq = target_sequence;
-	// int target_length = target_seq.length();
+		Runtime currRuntime = Runtime.getRuntime();
+		int nMAX = (int) (currRuntime.maxMemory() / 1024 / 1024);
+		System.out.println("MAX RAM :" + nMAX + "M");
 
-	// if (target_length < sub_length * 5) {
-	// local = false;
-	// break;
-	// } else if (target_length < sub_length * 1333) {
-	// T1 = 0.1;
-	// T2 = 0;
-	// }
+		Date startDate = new Date();
+		long startCpuTimeNano = sccgc.getCPUTime();
+		System.out.println("Start time: " + startDate);
 
-	// // pre-processing
+		while (local) {
+			mismatch = 0;
+			System.out.println(target_genome + " is compressing...\n");
 
-	// // String auxiliary = meta_data + "\n" + length + "\n";
+			File file = new File(final_file);
+			if (file.exists()) {
+				file.delete();
+			}
 
-	// List<Position> L_list = sccgc.lowercase_position(target_seq);
+			// load data
+			String greference = reference_genome;
+			String gtarget = target_genome;
+			String tempfile = final_folder + "//interim.txt";
+			String reference_seq = sccgc.LreadSeq(greference);
+			String target_seq = sccgc.LreadSeq(gtarget);
+			int target_length = target_seq.length();
 
-	// compress_sequence = sccgc.write(L_list);
-	// compress_sequence = compress_sequence + "\n";
-	// // write(final_file, "\n", true);
-	// reference_seq = reference_seq.toUpperCase();
-	// target_seq = target_seq.toUpperCase();
+			if (target_length < sub_length * 5) {
+				local = false;
+				break;
+			} else if (target_length < sub_length * 1333) {
+				T1 = 0.1;
+				T2 = 0;
+			}
 
-	// sot = 0;
-	// eot = sub_length;
-	// sor = 0;
-	// eor = sub_length;
-	// Position position = new Position();
+			// pre-processing
+			String auxiliary = meta_data + "\n" + length + "\n";
+			List<Position> L_list = sccgc.lowercase_position(target_seq);
 
-	// while (true) {
+			sccgc.write(final_file, L_list, false, auxiliary);
+			sccgc.write(final_file, "\n", true);
 
-	// SCCGC utilities = new SCCGC();
-	// int kmerlength = SCCGC.kmer_length;
+			reference_seq = reference_seq.toUpperCase();
+			target_seq = target_seq.toUpperCase();
 
-	// if (eor > reference_seq.length()) {
-	// text = (target_seq.substring(sot));
-	// if (text.length() <= 0) {
-	// break;
-	// } else {
-	// temp_sequence1 = temp_sequence1 + text;
-	// break;
-	// }
-	// }
-	// if (eot > target_seq.length()) {
-	// text = (target_seq.substring(sot));
-	// if (text.length() <= 0) {
-	// break;
-	// } else {
-	// temp_sequence1 = temp_sequence1 + text;
-	// break;
-	// }
-	// }
+			file = new File(tempfile);
+			if (file.exists()) {
+				file.delete();
+			}
 
-	// reference = (reference_seq.substring(sor, eor));
-	// target = (target_seq.substring(sot, eot));
+			sot = 0;
+			eot = sub_length;
+			sor = 0;
+			eor = sub_length;
+			Position position = new Position();
 
-	// // segmentation-based Local Matching Phase
+			while (true) {
 
-	// List<Position> list = sccgc.Lmatch(reference, target, kmerlength);
+				SCCGC utilities = new SCCGC();
+				int kmerlength = SCCGC.kmer_length;
 
-	// if (list.size() <= 0) {
-	// kmerlength = 11;// k`
-	// list = sccgc.Lmatch(reference, target, kmerlength);
-	// }
+				if (eor > reference_seq.length()) {
+					text = (target_seq.substring(sot));
+					if (text.length() <= 0) {
+						break;
+					} else {
+						sccgc.write(tempfile, text, true);
+						break;
+					}
+				}
+				if (eot > target_seq.length()) {
+					text = (target_seq.substring(sot));
+					if (text.length() <= 0) {
+						break;
+					} else {
+						sccgc.write(tempfile, text, true);
+						break;
+					}
+				}
 
-	// if (list.size() <= 0) {
-	// mismatch++;
+				reference = (reference_seq.substring(sor, eor));
+				target = (target_seq.substring(sot, eot));
 
-	// if (eot >= target_seq.length() - 1) {
-	// text = (target_seq.substring(sot));
-	// temp_sequence1 = temp_sequence1 + text;
-	// break;
-	// }
+				// segmentation-based Local Matching Phase
+				List<Position> list = sccgc.Lmatch(reference, target, kmerlength);
 
-	// if (is_con) {
-	// controuble++;
-	// }
-	// is_con = true;
+				if (list.size() <= 0) {
+					kmerlength = 11;// k`
+					list = sccgc.Lmatch(reference, target, kmerlength);
+				}
 
-	// text += target + "\n";
-	// temp_sequence1 = temp_sequence1 + text;
-	// sot += sub_length;
-	// eot = sot + sub_length;
-	// eor += sub_length;
-	// int difference = target_seq.length() - sot;
+				if (list.size() <= 0) {
+					mismatch++;
 
-	// if (difference <= kmer_length) {
-	// text = (target_seq.substring(sot));
-	// temp_sequence1 = temp_sequence1 + text;
-	// break;
-	// } else if (difference < sub_length) {
-	// eot = target_seq.length() - 1;
-	// }
+					if (eot >= target_seq.length() - 1) {
+						text = (target_seq.substring(sot));
+						sccgc.write(tempfile, text, true);
+						break;
+					}
 
-	// int difference_ref = reference_seq.length() - sor;
+					if (is_con) {
+						controuble++;
+					}
+					is_con = true;
 
-	// if (difference_ref < sub_length) {
-	// eor = reference_seq.length() - 1;
-	// }
-	// if (eot >= target_seq.length()) {
-	// break;
-	// }
-	// if (difference_ref <= kmer_length) {
-	// text = (target_seq.substring(sot));
-	// if (text.length() <= 0) {
-	// break;
-	// } else {
-	// if (text.length() > (sub_length * T1))// T1
-	// {
-	// mismatch++;
-	// }
-	// if (mismatch > T2) {// T2
-	// local = false;
-	// break;
-	// }
-	// temp_sequence1 = temp_sequence1 + text;
-	// break;
-	// }
-	// }
-	// continue;
-	// }
+					text += target + "\n";
+					sccgc.write(tempfile, text, true);
+					sot += sub_length;
+					eot = sot + sub_length;
+					eor += sub_length;
+					int difference = target_seq.length() - sot;
 
-	// is_con = false;
-	// if (controuble > 2)
-	// mismatch -= controuble;
-	// controuble = 1;
+					if (difference <= kmer_length) {
+						text = (target_seq.substring(sot));
+						sccgc.write(tempfile, text, true);
+						break;
+					} else if (difference < sub_length) {
+						eot = target_seq.length() - 1;
+					}
 
-	// position = sccgc.format_matches(list);
+					int difference_ref = reference_seq.length() - sor;
 
-	// if (mismatch > T2) {// T2
-	// local = false;
-	// break;
-	// }
+					if (difference_ref < sub_length) {
+						eor = reference_seq.length() - 1;
+					}
+					if (eot >= target_seq.length()) {
+						break;
+					}
+					if (difference_ref <= kmer_length) {
+						text = (target_seq.substring(sot));
+						if (text.length() <= 0) {
+							break;
+						} else {
+							if (text.length() > (sub_length * T1))// T1
+							{
+								mismatch++;
+							}
+							if (mismatch > T2) {// T2
+								local = false;
+								break;
+							}
+							sccgc.write(tempfile, text, true);
+							break;
+						}
+					}
+					continue;
+				}
 
-	// sot += position.getendinTar() + 1;
-	// eot = sot + sub_length;
-	// sor += endref + 1;
-	// endref = 0;
-	// eor = sor + sub_length;
+				is_con = false;
+				if (controuble > 2)
+					mismatch -= controuble;
+				controuble = 1;
 
-	// temp_sequence1 = temp_sequence1 + text;
+				position = sccgc.format_matches(list);
 
-	// int difference = target_seq.length() - sot;
+				if (mismatch > T2) {// T2
+					local = false;
+					break;
+				}
 
-	// if (difference <= kmer_length) {
-	// text = (target_seq.substring(sot));
-	// if (text.length() <= 0) {
-	// break;
-	// } else {
-	// temp_sequence1 = temp_sequence1 + text;
-	// break;
-	// }
+				sot += position.getendinTar() + 1;
+				eot = sot + sub_length;
+				sor += endref + 1;
+				endref = 0;
+				eor = sor + sub_length;
 
-	// } else if (difference < sub_length) {
-	// eot = target_seq.length() - 1;
-	// }
+				sccgc.write(tempfile, text, true);
 
-	// int difference_ref = reference_seq.length() - sor;
+				int difference = target_seq.length() - sot;
 
-	// if (difference_ref < sub_length) {
-	// eor = reference_seq.length() - 1;
-	// }
-	// if (difference_ref <= kmer_length) {
-	// text = (target_seq.substring(sot));
-	// if (text.length() <= 0) {
-	// break;
-	// } else {
-	// if (text.length() > (sub_length * T1))// T1
-	// {
-	// mismatch++;
-	// }
-	// if (mismatch > T2) {// T2
-	// local = false;
-	// break;
-	// }
-	// temp_sequence1 = temp_sequence1 + text;
-	// break;
-	// }
-	// }
-	// }
+				if (difference <= kmer_length) {
+					text = (target_seq.substring(sot));
+					if (text.length() <= 0) {
+						break;
+					} else {
+						sccgc.write(tempfile, text, true);
+						break;
+					}
 
-	// if (!local) {
-	// break;
-	// }
+				} else if (difference < sub_length) {
+					eot = target_seq.length() - 1;
+				}
 
-	// // post-processing
+				int difference_ref = reference_seq.length() - sor;
 
-	// compress_sequence = sccgc.postprocess(reference_seq, compress_sequence, "a");
+				if (difference_ref < sub_length) {
+					eor = reference_seq.length() - 1;
+				}
+				if (difference_ref <= kmer_length) {
+					text = (target_seq.substring(sot));
+					if (text.length() <= 0) {
+						break;
+					} else {
+						if (text.length() > (sub_length * T1))// T1
+						{
+							mismatch++;
+						}
+						if (mismatch > T2) {// T2
+							local = false;
+							break;
+						}
+						sccgc.write(tempfile, text, true);
+						break;
+					}
+				}
 
-	// long taskCPUTimeNano = sccgc.getCPUTime() - startCpuTimeNano;
-	// System.out.println("Compressed time: " + (double) taskCPUTimeNano /
-	// 1000000000.0 + " seconds.");
-	// break;
-	// }
+			}
 
-	// if (!local) {
-	// // load data
+			if (!local) {
+				break;
+			}
 
-	// String greference = reference_sequence;
-	// String gtarget = target_sequence;
+			// post-processing
+			sccgc.postprocess(tempfile, final_file);
+			sccgc.use7zip(final_file);
 
-	// String reference_seq = sccgc.processSequence(greference);
-	// // System.out.println(reference_seq);
-	// // System.out.println("---");
-	// ProcessInformation target_seq = sccgc.processTargetSequence(gtarget);
+			file = new File(tempfile);
+			file.delete();
+			file = new File(final_file);
+			file.delete();
 
-	// String targetSequence = target_seq.getTargetSequence();
-	// // System.out.println(targetSequence);
+			long taskCPUTimeNano = sccgc.getCPUTime() - startCpuTimeNano;
+			System.out.println("Compressed time: " + (double) taskCPUTimeNano / 1000000000.0 + " seconds.");
+			break;
+		}
 
-	// String Nlist = target_seq.getNlist();
-	// String Llist = target_seq.getLlist();
-	// // pre-processing
+		if (!local) {
+			File file = new File(final_file);
+			if (file.exists()) {
+				file.delete();
+			}
 
-	// int kmer_length = SCCGC.kmer_length;
+			// load data
+			String greference = reference_genome;
+			String gtarget = target_genome;
+			String tempfile = final_folder + "//interim.txt";
 
-	// reference = (reference_seq.substring(0, reference_seq.length()));
-	// target = (targetSequence.substring(0, targetSequence.length()));
-	// System.out.println("reference:" + reference);
-	// System.out.println("target:" + target);
-	// // global Matching Phase
+			String reference_seq = sccgc.GreadrefSeq(greference);
+			String target_seq = sccgc.GreadtarSeq(gtarget, final_file);
 
-	// List<Position> list = sccgc.Gmatch(reference, target, kmer_length);
-	// for (Position pos : list) {
-	// System.out.println("list:" + pos.toString());
-	// }
+			file = new File(tempfile);
+			if (file.exists()) {
+				file.delete();
+			}
 
-	// // post-processing
-	// System.out.println("compress_sequence:" + compress_sequence);
-	// temp_sequence2 = temp_sequence2 + sccgc.format_matches_sequence(list);
-	// System.out.println("temp_sequence2:" + temp_sequence2);
-	// compress_sequence = sccgc.postprocess(temp_sequence2, compress_sequence,
-	// "a");
+			// pre-processing
+			int kmer_length = SCCGC.kmer_length;
 
-	// long taskCPUTimeNano = sccgc.getCPUTime() - startCpuTimeNano;
-	// System.out.println("Compressed time: " + (double) taskCPUTimeNano /
-	// 1000000000.0 + " seconds.");
-	// }
-	// System.out.println("Done\n" +
-	// "-----------------------------------------------------");
-	// System.out.println("temp1: \n" + temp_sequence1);
+			reference = (reference_seq.substring(0, reference_seq.length()));
+			target = (target_seq.substring(0, target_seq.length()));
 
-	// System.out.println("temp2: \n" + temp_sequence2);
+			// global Matching Phase
+			List<Position> list = sccgc.Gmatch(reference, target, kmer_length);
 
-	// return compress_sequence;
-	// }
+			// post-processing
+			sccgc.format_matches(list, tempfile);
+			sccgc.postprocess(tempfile, final_file);
+
+			sccgc.use7zip(final_file);
+
+			file = new File(tempfile);
+			file.delete();
+
+			file = new File(final_file);
+			file.delete();
+
+			long taskCPUTimeNano = sccgc.getCPUTime() - startCpuTimeNano;
+			System.out.println("Compressed time: " + (double) taskCPUTimeNano / 1000000000.0 + " seconds.");
+		}
+		System.out.println("Done\n" + "-----------------------------------------------------");
+	}
 
 }

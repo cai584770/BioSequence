@@ -1,8 +1,8 @@
 package com.cai.compress.SCCG.entity;
 
 public class Position {
-    private int startinRef;
-    private int endinRef;
+    public int startinRef;
+    public int endinRef;
     private int startinTar;
     private int endinTar;
 
